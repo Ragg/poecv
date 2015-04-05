@@ -1,0 +1,5 @@
+PoECV/bin/
+PoECV/obj/
+*.suo
+packages/
+*.user
