@@ -77,7 +77,7 @@
                   SelectedItemChanged="TreeView_OnSelectedItemChanged" BorderThickness="0">
             <TreeView.Resources>
                 <Style TargetType="TreeViewItem">
-                    <EventSetter Event="RequestBringIntoView" Handler="TreeViewItem_RequestBringIntoView"/>
+                    <EventSetter Event="RequestBringIntoView" Handler="TreeViewItem_RequestBringIntoView" />
                 </Style>
             </TreeView.Resources>
         </TreeView>

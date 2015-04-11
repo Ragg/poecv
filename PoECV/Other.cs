@@ -7,10 +7,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using AlphanumComparator;
 using GalaSoft.MvvmLight.CommandWpf;
+using JetBrains.Annotations;
 using OEIFormats.FlowCharts;
 using OEIFormats.FlowCharts.Conversations;
 using OEIFormats.Strings;
-using JetBrains.Annotations;
 
 namespace PoECV
 {
@@ -103,6 +103,33 @@ namespace PoECV
 
         public ConversationFile File { get; private set; }
         public int Id { get; private set; }
+    }
+
+    public static class GuidLookup
+    {
+        public static Dictionary<string, string> Lookup = new Dictionary<string, string>();
+
+        static GuidLookup()
+        {
+            var list = new Dictionary<string, string>
+            {
+                {"Edér", "b1a7e800-0000-0000-0000-000000000000"},
+                {"Durance", "b1a7e801-0000-0000-0000-000000000000"},
+                {"Aloth", "b1a7e803-0000-0000-0000-000000000000"},
+                {"Kana Rua", "b1a7e804-0000-0000-0000-000000000000"},
+                {"Sagani", "b1a7e805-0000-0000-0000-000000000000"},
+                {"Pallegina", "b1a7e806-0000-0000-0000-000000000000"},
+                {"Grieving Mother", "b1a7e807-0000-0000-0000-000000000000"},
+                {"Hiravias", "b1a7e808-0000-0000-0000-000000000000"},
+                {"Calisca", "b1a7e809-0000-0000-0000-000000000000"},
+                {"Heodan", "b1a7e810-0000-0000-0000-000000000000"}
+            };
+            foreach (var entry in list)
+            {
+                Lookup[entry.Key] = entry.Value;
+                Lookup[entry.Value] = entry.Key;
+            }
+        }
     }
 
     public class NodeEntry

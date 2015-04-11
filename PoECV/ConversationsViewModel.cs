@@ -63,7 +63,16 @@ namespace PoECV
                     {
                         paramList.Add(new ParameterSelection());
                     }
-                    paramList[i].Parameters.Add(call.Parameters[i]);
+                    string value;
+                    var item = call.Parameters[i];
+                    if (GuidLookup.Lookup.TryGetValue(item, out value))
+                    {
+                        paramList[i].Parameters.Add(value);
+                    }
+                    else
+                    {
+                        paramList[i].Parameters.Add(item);
+                    }
                 }
             }
         }
@@ -189,9 +198,18 @@ namespace PoECV
                             var flag = true;
                             for (var i = 0; i < call.Count; i++)
                             {
-                                if (parameters[i].Selection != null)
+                                var selection = parameters[i].Selection;
+                                if (selection != null)
                                 {
-                                    flag = flag && parameters[i].Selection == call[i];
+                                    string value;
+                                    if (GuidLookup.Lookup.TryGetValue(selection, out value))
+                                    {
+                                        flag = flag && value == call[i];
+                                    }
+                                    else
+                                    {
+                                        flag = flag && selection == call[i];
+                                    }
                                     if (!flag)
                                     {
                                         break;
