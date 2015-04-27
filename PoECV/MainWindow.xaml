@@ -41,7 +41,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button Command="{Binding SearchCommand}">
+                        <Button Command="{Binding ExecuteSearchCommand}">
                             <Label Content="Search" />
                         </Button>
                         <Button Command="{Binding ClearParametersCommand}">

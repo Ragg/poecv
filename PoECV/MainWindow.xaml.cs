@@ -20,10 +20,11 @@ namespace PoECV
             var vm = (ConversationsViewModel) DataContext;
             var view = (TreeView) sender;
             var item = (TreeViewItem) view.SelectedValue;
-            vm.SelectedNode = (NodeEntry) item.Header;
+            vm.SelectedNode = (ConversationNodeViewModel) item.Header;
         }
 
-        private void TreeViewItem_RequestBringIntoView(object sender, RequestBringIntoViewEventArgs e)
+        private void TreeViewItem_RequestBringIntoView(object sender,
+            RequestBringIntoViewEventArgs e)
         {
             e.Handled = true;
         }

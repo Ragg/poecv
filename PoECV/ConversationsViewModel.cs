@@ -20,7 +20,7 @@ namespace PoECV
         private string _conversationsFilter = "";
         private ConversationFile _selectedFile;
         private string _selectedMethod;
-        private NodeEntry _selectedNode;
+        private ConversationNodeViewModel _selectedNode;
         private SearchResult _selectedResult;
 
         static ConversationsViewModel()
@@ -35,9 +35,11 @@ namespace PoECV
         public ConversationsViewModel()
         {
             ClearParametersCommand = new RelayCommand(ClearParameters);
-            SearchCommand = new RelayCommand(SearchMethod);
+            ExecuteSearchCommand = new RelayCommand(ExecuteSearch);
             _conversationsView = CollectionViewSource.GetDefaultView(ConversationFiles);
             _conversationsView.Filter = o => o.ToString().Contains(_conversationsFilter);
+            //Get all the conditional calls and their parameters for populating the search
+            //field drop-downs.
             var calls =
                 ConversationFiles.Select(f => ConversationData.Load(f.Path))
                     .SelectMany(c => c.Nodes)
@@ -78,12 +80,12 @@ namespace PoECV
         }
 
         public RelayCommand ClearParametersCommand { get; private set; }
-        public RelayCommand SearchCommand { get; private set; }
+        public RelayCommand ExecuteSearchCommand { get; private set; }
         public Dictionary<string, List<ParameterSelection>> ConditionalMethods { get; private set; }
         public string NodeInfo { get; private set; }
         public ObservableCollection<TreeViewItem> Nodes { get; private set; }
 
-        public NodeEntry SelectedNode
+        public ConversationNodeViewModel SelectedNode
         {
             set
             {
@@ -175,7 +177,7 @@ namespace PoECV
             }
         }
 
-        private void SearchMethod()
+        private void ExecuteSearch()
         {
             if (SelectedMethod == null)
             {
@@ -228,6 +230,7 @@ namespace PoECV
             OnPropertyChanged("SearchResults");
         }
 
+        //Recursively create a TreeView representing the conversation node graph.
         private TreeViewItem AddLinks(int nodeId, ConversationData data, StringTableFile text,
             bool isBankChild = false, HashSet<int> addedNodes = null)
         {
@@ -238,13 +241,19 @@ namespace PoECV
             var node = data.GetNodeByID(nodeId);
             var nodeText = text.Entries.FirstOrDefault(t => t.ID == nodeId);
             var wasAlreadyAdded = addedNodes.Contains(nodeId);
-            var nodeEntry = new NodeEntry(node, nodeText, !wasAlreadyAdded, isBankChild);
+            var nodeEntry = new ConversationNodeViewModel(node, nodeText, !wasAlreadyAdded,
+                isBankChild);
             var item = new TreeViewItem {Header = nodeEntry};
             if (nodeEntry.Trigger != null)
             {
                 item.KeyDown += HandleTrigger;
                 return item;
             }
+
+            //Conversation node graphs can be cyclic. Therefore, in order to represent them as a tree,
+            //nodes that have already been added won't have their children added, in order
+            //to prevent infinite cycles. Instead, an event handler is added to the node in order to
+            //jump to the first instance of that node in the tree.
             if (wasAlreadyAdded)
             {
                 item.FontStyle = FontStyles.Italic;
@@ -275,7 +284,7 @@ namespace PoECV
             }
             e.Handled = true;
             var item = (TreeViewItem) sender;
-            var entry = (NodeEntry) item.Header;
+            var entry = (ConversationNodeViewModel) item.Header;
             SelectedFile = entry.Trigger.File;
             SelectNode(entry.Trigger.Id, Nodes.First());
         }
@@ -288,7 +297,7 @@ namespace PoECV
             }
             e.Handled = true;
             var item = (TreeViewItem) sender;
-            var entry = (NodeEntry) item.Header;
+            var entry = (ConversationNodeViewModel) item.Header;
             SelectNode(entry.ID, Nodes.First());
         }
 
@@ -297,7 +306,7 @@ namespace PoECV
             foreach (var treeViewItem in item.Items)
             {
                 var treeItem = (TreeViewItem) treeViewItem;
-                var entry = (NodeEntry) treeItem.Header;
+                var entry = (ConversationNodeViewModel) treeItem.Header;
                 if (entry.ID == node && entry.IsMain)
                 {
                     ExpandParentNodes(treeItem);
@@ -320,6 +329,7 @@ namespace PoECV
             }
         }
 
+        //Recursively get all files in a directory.
         private static IEnumerable<string> DirSearch(string dir)
         {
             foreach (var f in Directory.GetFiles(dir))
